@@ -1,0 +1,17 @@
+.Counter {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .Counter-button {
+    color: white;
+    background-color: green;
+    border: none;
+    border-radius: 10px;
+    padding: 16px 32px;
+    font-size: 16px;
+  }
+  
+  .Counter-counter {
+    margin-bottom: 10px;
+  }
