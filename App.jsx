@@ -1,20 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
-import { BrowserRouter, Link, Redirect, Route, Switch } from "react-router-dom";
+import firebase from "firebase";
+import { BrowserRouter, Link, Redirect, Switch } from "react-router-dom";
+import { PersistGate } from "redux-persist/integration/react";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Profile from "./Screens/Profile";
 import { Main } from "./Screens/Main";
 import { Chats } from "./Screens/Chats";
-import { store } from "./Store";
+import { store, persistor } from "./Store";
 import { ROUTES } from "./constants";
 import { MyThemeContext, MyAnotherContext } from "./context";
 
 import "./App.css";
+import { PublicRoute } from "./HOC/PublicRoute";
+import { PrivateRoute } from "./HOC/PrivateRoute";
+import { Signup } from "./Screens/Signup";
 
 const App = () => {
   const [list] = useState();
+
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setAuthenticated(true);
+      } else {
+        setAuthenticated(false);
+      }
+    });
+  }, []);
+
   return (
-    <div>
-      <Provider store={store}>
+    <Provider store={store}>
+      <PersistGate loading={<CircularProgress />} persistor={persistor}>
         <MyThemeContext.Provider value={{ theme: "dark" }}>
           <MyAnotherContext.Provider value={{ name: "Petya" }}>
             <BrowserRouter>
@@ -28,41 +47,77 @@ const App = () => {
                 <li>
                   <Link to={ROUTES.CHATS}>Chats</Link>
                 </li>
+                <li>
+                  <Link to={ROUTES.SIGNIN}>Login</Link>
+                </li>
+                <li>
+                  <Link to={ROUTES.SIGNUP}>Sign up</Link>
+                </li>
               </ul>
               <Switch>
-                <Route exact path={ROUTES.MAIN}>
+                <PublicRoute
+                  exact
+                  path={ROUTES.MAIN}
+                  authenticated={authenticated}
+                >
                   <Main list={list} />
-                </Route>
-                <Route exact path={ROUTES.PROFILE}>
-                  <Profile text="myText" />
-                </Route>
+                </PublicRoute>
 
-                <Route
+                <PublicRoute
+                  exact
+                  path={ROUTES.SIGNIN}
+                  authenticated={authenticated}
+                >
+                  login
+                </PublicRoute>
+
+                <PublicRoute
+                  exact
+                  path={ROUTES.SIGNUP}
+                  authenticated={authenticated}
+                >
+                  <Signup />
+                </PublicRoute>
+
+                <PrivateRoute
+                  exact
+                  path={ROUTES.PROFILE}
+                  authenticated={authenticated}
+                >
+                  <Profile text="myText" />
+                </PrivateRoute>
+
+                <PrivateRoute
                   exact
                   path={ROUTES.CHATS}
-                  render={() => {
-                    return <Chats />;
-                  }}
-                ></Route>
+                  authenticated={authenticated}
+                >
+                  <Chats />
+                </PrivateRoute>
 
-                <Route
+                <PrivateRoute
                   exact
                   path={ROUTES.CHAT}
-                  render={() => {
-                    return <Chats />;
-                  }}
-                ></Route>
+                  authenticated={authenticated}
+                >
+                  <Chats />
+                </PrivateRoute>
 
-                <Route path={ROUTES.NOT_FOUND}>Page not found 404</Route>
-                <Route path="*">
+                <PrivateRoute
+                  path={ROUTES.NOT_FOUND}
+                  authenticated={authenticated}
+                >
+                  Page not found 404
+                </PrivateRoute>
+                <PrivateRoute path="*" authenticated={authenticated}>
                   <Redirect to={ROUTES.NOT_FOUND} />
-                </Route>
+                </PrivateRoute>
               </Switch>
             </BrowserRouter>
           </MyAnotherContext.Provider>
         </MyThemeContext.Provider>
-      </Provider>
-    </div>
+      </PersistGate>
+    </Provider>
   );
 };
 
