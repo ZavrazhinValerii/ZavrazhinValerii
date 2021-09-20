@@ -1,34 +1,17 @@
-import React, { useState } from "react";
-import { TextField, Button } from "@material-ui/core";
+import { useState } from "react";
 
-export const Form = ({ name, handleNameChange, children }) => {
-  const [surname, setsurName] = useState("");
+export const Form = () => {
+  const [counter, setCounter] = useState(0);
 
-  const [isDisabled] = useState(false);
-
-  const handleSurnameChange = (e) => {
-    setsurName(e.target.value);
-  };
-
-  const handleClick = () => {};
+  console.log("Form rerendered");
 
   return (
     <>
-      <TextField variant="outlined" value={name} onChange={handleNameChange} />{" "}
-      <TextField
-        margin="normal"
-        multiline
-        maxRows={5}
-        variant="outlined"
-        color="primary"
-        disabled={isDisabled}
-        id="standard-basic"
-        label="text"
-        placeholder="enter some text"
-        value={surname}
-        onChange={handleSurnameChange}
-      />
-      <Button onClick={handleClick}>Click me!</Button>
+      <br />
+      <br />
+      <br />
+      <button onClick={() => setCounter(counter + 1)}>Click me!</button>
+      {counter}
     </>
   );
 };
